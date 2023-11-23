@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw map Editor</title>
+</head>
+
+<body>
+    <div class="canvas-container">
+        <div id="detail-props" style="width: 80%; margin-bottom: 10px;"></div>
+        <canvas id="drawmap-canvas" width="840" height="480">
+            Enable Javascript
+        </canvas>
+    </div>
+    <div class="canvas-options">
+        <h3>Drawmap settings</h3>
+        <div id="optid-1">
+            Name : <input id="opt-name" placeholder="Drawmap name..." value="drawMap"/>
+        </div>
+        <div id="optid-1">
+            Color : <span id="opt-color-draw">&nbsp;</span>
+            <button id="switch-color-btn-1">Switch (X)</button>
+        </div>
+        <div id="optid-2">
+            Color when filling transparency <span id="opt-color-autofill">&nbsp;</span>
+            <button id="switch-color-btn-2">Switch (X)</button>
+        </div>
+        <div id="optid-4">
+            <label for="draw-rect">
+                <input type="checkbox" id="draw-rect"/> Use Rectangle Tool (R)
+            </label>
+        </div>
+        <div id="optid-5">
+            <label for="draw-border">
+                <input type="checkbox" id="draw-border"/> Show Draw Border
+            </label>
+        </div>
+        <div id="optid-6">
+            <label for="toggle-multi">
+                <input type="checkbox" id="toggle-multi"/> Multiple Draw Map
+            </label>
+        </div>
+        <hr>
+        <div id="opt-normal-mode">
+            <span id="opt-filename">drawMap</span>
+            <span>.js&nbsp;-&nbsp;</span>
+            <button id="on-generate-draw-map" class="btn-generate">Generate Drawmap</button>
+        </div>
+        <div id="opt-multi-mode" style="display: none;">
+            <div id="multi-mode-detail">
+
+            </div>
+            <div class="multi-mode-btns">
+                <div style="margin-bottom: 10px;">
+                    Drawmap Name: <input id="opt-drawmap-name" value="child_map" />
+                </div>
+                <div>
+                    <button id="add-new" class="btn-generate" onclick="AssignDrawMapToObject()">Add New</button>
+                    <button id="on-generate-multi" class="btn-generate" onclick="GenerateDrawMap()">Generate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/src/drawer/main.ts"></script>
+</body>
+
+</html>
