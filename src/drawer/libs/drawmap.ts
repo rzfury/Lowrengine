@@ -126,16 +126,16 @@ class DrawMap {
   public AddPixel = (event: MouseEvent) => {
     if (!this.mouseClicked || this.isDrawingRect) { return; }
 
-    if (event.button === 0) {
+    if (event.buttons === 1) {
       const { left, top } = this.canvas.getBoundingClientRect();
       const mousePos: Point = {
         x: Math.floor((event.clientX - left) / 10),
         y: Math.floor((event.clientY - top) / 10),
       };
-      // const pixelIndex = this.drawCoords.indexOf(stringPos);
       const pixelIndex = this.drawCoords.findIndex(coords => compareObject(coords, mousePos));
 
-      if (pixelIndex >= 0 && this.colorCoords[pixelIndex] === this.autoFillColorId) {
+      if (pixelIndex >= 0) {
+        if (this.colorCoords[pixelIndex] !== this.autoFillColorId) return;
         this.drawCoords[pixelIndex] = mousePos;
         this.colorCoords[pixelIndex] = this.colorToColorId(this.currentColor);
       }
@@ -150,14 +150,15 @@ class DrawMap {
 
   public RemovePixel = (event: MouseEvent) => {
     if (!this.mouseClicked || this.isDrawingRect) { return; }
-
-    if (event.button === 2) {
+    
+    if (event.buttons === 2) {
       const { left, top } = this.canvas.getBoundingClientRect();
       const mousePos = {
         x: Math.floor((event.clientX - left) / 10),
         y: Math.floor((event.clientY - top) / 10),
       };
-      const pixelIndex = this.drawCoords.indexOf(mousePos);
+      
+      const pixelIndex = this.drawCoords.findIndex(coords => compareObject(coords, mousePos));
 
       if (pixelIndex >= 0) {
         this.drawCoords.splice(pixelIndex, 1);
@@ -257,12 +258,11 @@ class DrawMap {
         bottom: this.point1.y,
       };
 
-      const oldBorderRect = this.borderRect;
       this.borderRect = {
-        top: this.point2.y < oldBorderRect.top ? this.point2.y : oldBorderRect.top,
-        left: this.point2.x < oldBorderRect.left ? this.point2.x : oldBorderRect.left,
-        right: this.point2.x > oldBorderRect.right ? this.point2.x : oldBorderRect.right,
-        bottom: this.point2.y > oldBorderRect.bottom ? this.point2.y : oldBorderRect.bottom,
+        top: this.point2.y < this.borderRect.top ? this.point2.y : this.borderRect.top,
+        left: this.point2.x < this.borderRect.left ? this.point2.x : this.borderRect.left,
+        right: this.point2.x > this.borderRect.right ? this.point2.x : this.borderRect.right,
+        bottom: this.point2.y > this.borderRect.bottom ? this.point2.y : this.borderRect.bottom,
       };
     }
     else {
@@ -339,9 +339,12 @@ class DrawMap {
 
   public static GenerateDrawMap = () => {
     let texts = '', additional = '';
+    const arrayOfObj = Object.entries(DrawMap.Instance.tempObjects).map(([_, value]) => {
+      return value.drawMap;
+    });
 
     if (DrawMap.Instance.multiMode) {
-      texts = JSON.stringify(DrawMap.Instance.tempObjects).replace(/\"/g, '');
+      texts = JSON.stringify(arrayOfObj).replace(/\"/g, '');
     } else {
       let drawArrays = DrawMap.GenerateDrawArray();
       texts = JSON.stringify(drawArrays).replace(/\"/g, '');
@@ -355,10 +358,11 @@ class DrawMap {
       downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
     } else {
       downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-      downloadLink.onclick = () => { downloadLink.remove(); };
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
     }
+
+    downloadLink.onclick = () => { downloadLink.remove(); };
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
 
     downloadLink.click();
   }
@@ -375,7 +379,13 @@ class DrawMap {
       }
     }
 
-    Object.assign(DrawMap.Instance.tempObjects, { [keyName]: drawMap });
+    Object.assign(DrawMap.Instance.tempObjects, { [keyName]: {
+      drawMap: drawMap,
+      offset: {
+        x: DrawMap.Instance.borderRect.left,
+        y: DrawMap.Instance.borderRect.top,
+      }
+    } });
 
     DrawMap.Instance.drawCoords.length = 0;
     DrawMap.Instance.colorCoords.length = 0;
@@ -390,13 +400,45 @@ class DrawMap {
     DrawMap.ShowDrawMapObjDetail();
   }
 
+  public static CopyFromDrawMap = (keyName: string) => {
+    //@ts-ignore
+    const obj: { drawMap: number[][], offset: Point } = DrawMap.Instance.tempObjects[keyName];
+    
+    for (let iy = 0; iy < obj.drawMap.length; iy++) {
+      for (let ix = 0; ix < obj.drawMap[iy].length; ix++) {    
+        if (obj.drawMap[iy][ix] === DrawMap.Instance.autoFillColorId) continue;
+
+        const mousePos: Point = {
+          x: obj.offset.x + ix,
+          y: obj.offset.y + iy,
+        };
+        
+        const pixelIndex = DrawMap.Instance.drawCoords.findIndex(coords => compareObject(coords, mousePos));
+    
+        if (pixelIndex >= 0) {
+          DrawMap.Instance.drawCoords[pixelIndex] = mousePos;
+          DrawMap.Instance.colorCoords[pixelIndex] = obj.drawMap[iy][ix];
+        }
+        else {
+          DrawMap.Instance.drawCoords.push(mousePos);
+          DrawMap.Instance.colorCoords.push(obj.drawMap[iy][ix]);
+        }
+      }
+    }
+
+    DrawMap.Instance.CalculateBorderRects();
+  }
+
   public static ShowDrawMapObjDetail = () => {
     const optDetailDrawmap = document.getElementById('multi-mode-detail')!;
 
     let html = '';
     for (let key in DrawMap.Instance.tempObjects) {
       html += `<div id="opt-detail-${key}">`;
-      html += `${key} - <button class="btn-remove" onclick="DeleteDrawMapFromObject('${key}')">Remove</button>`;
+      html += `${key} - `;
+      html += `<button class="btn-generate" onclick="window.__3310F_DrawMap_CopyFromDrawMap('${key}')">Copy</button>`;
+      html += '&nbsp;';
+      html += `<button class="btn-remove" onclick="window.__3310F_DrawMap_DeleteDrawMapFromObject('${key}')">Remove</button>`;
       html += '</div>';
     }
     optDetailDrawmap.innerHTML = html;

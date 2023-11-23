@@ -3,13 +3,17 @@ import './style.css';
 
 declare global {
   interface Window {
-    DrawMap: DrawMap
+    __3310F_DrawMap: DrawMap,
+    __3310F_DrawMap_DeleteDrawMapFromObject: (name: string) => void
+    __3310F_DrawMap_CopyFromDrawMap: (name: string) => void
   }
 }
 
 function app() {
   DrawMap.Instance = new DrawMap();
-  window.DrawMap = DrawMap.Instance;
+  window.__3310F_DrawMap = DrawMap.Instance;
+  window.__3310F_DrawMap_DeleteDrawMapFromObject = DrawMap.DeleteDrawMapFromObject;
+  window.__3310F_DrawMap_CopyFromDrawMap = DrawMap.CopyFromDrawMap;
 
   document.getElementById("switch-color-btn-1")!.addEventListener('click', () => {
     DrawMap.SwitchDrawingColor();
