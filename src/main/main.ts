@@ -1,11 +1,28 @@
 import Game from './libs/game';
 import './style.css';
 
+declare global {
+  interface Window {
+    __3310F_GAME: Game;
+  }
+}
+
 function app() {
-  Game.CreateGame();
+  Game.Instance = new Game();
+  window.__3310F_GAME = Game.Instance;
+
+  Game.Instance.Renderer = (game: Game) => {
+
+  }
+
+  Game.Instance.Update = (game: Game) => {
+    
+  }
+
+  Game.Instance.Init();
 
   window.onunload = () => {
-    window._3310F_GAME.Unload();
+    window.__3310F_GAME.Unload();
   }
 }
 app();

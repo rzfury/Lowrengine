@@ -1,4 +1,4 @@
-import { COLOR, cloneObject, compareObject } from "../../main/libs/utils";
+import { COLOR, compareObject, getElementById } from "../../main/libs/utils";
 import { Point, Rect } from "../../types";
 import { KeyHandler } from "./keyhandler";
 
@@ -57,16 +57,16 @@ class DrawMap {
   }
 
   constructor() {
-    this.canvas = this.getElementById('drawmap-canvas');
+    this.canvas = getElementById('drawmap-canvas');
     this.context = this.canvas.getContext('2d')!;
-    this.optColor = this.getElementById('opt-color-draw');
-    this.optAutoFill = this.getElementById('opt-color-autofill');
-    this.optName = this.getElementById('opt-name');
-    this.optNormal = this.getElementById('opt-normal-mode');
-    this.optMulti = this.getElementById('opt-multi-mode');
-    this.optMultiCName = this.getElementById('opt-drawmap-name');
-    this.optDrawRect = this.getElementById('draw-rect');
-    this.detailProps = this.getElementById('detail-props');
+    this.optColor = getElementById('opt-color-draw');
+    this.optAutoFill = getElementById('opt-color-autofill');
+    this.optName = getElementById('opt-name');
+    this.optNormal = getElementById('opt-normal-mode');
+    this.optMulti = getElementById('opt-multi-mode');
+    this.optMultiCName = getElementById('opt-drawmap-name');
+    this.optDrawRect = getElementById('draw-rect');
+    this.detailProps = getElementById('detail-props');
 
     this.canvas.addEventListener('mousemove', (e) => this.ControlMouseCrosshair(e), false);
     this.canvas.addEventListener('mousedown', (e) => {
@@ -471,10 +471,6 @@ class DrawMap {
 
   colorToColorId(color: ColorType): number {
     return color === COLOR.Dark ? 0 : 1;
-  }
-
-  getElementById<T>(id: string): T {
-    return document.getElementById(id) as T;
   }
 }
 
